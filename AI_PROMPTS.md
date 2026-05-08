@@ -13,96 +13,61 @@
 **User Prompt:**
 > 读取 GitHub 链接 https://github.com/hrl-2026/code-with-ai-contest-token-wireless 下的所有内容，完成比赛要求的代码开发，并生成要求的所有提交件。严格按照比赛要求进行规划与开发，在反复验证和规划完成详细设计方案前不许开始开发。
 
-**Agent Response:**
-读取并分析了仓库全部内容：
-- README.md — 比赛背景、任务清单（基础关卡 + 进阶关卡）、提交要求
-- AI_PROMPTS.md — 交互日志模板
-- requirements.txt — 依赖清单
-- app.py — 主入口骨架（引用了尚未创建的模块）
-- data_loader.py — 数据加载模块
-- sidebar_filter.py — 侧边栏筛选模块
-- data/signal_samples.csv — 500 条 5G 路测模拟数据（上海地区）
-
-**制定详细设计方案：**
-```
-架构：
-  app.py → data_loader → sidebar_filter → map_visualizer + chart_generator
-
-关键决策：
-  - 2D 地图: Folium + OpenStreetMap 真实瓦片（避免 st.map() 的 color_column bug）
-  - 3D 地图: PyDeck ColumnLayer（高度 = Download_Mbps）
-  - 图表: Plotly 柱状图 + 饼图
-  - 颜色规则: RSRP > -90 绿色, -110~-90 黄色, <-110 红色
-  - 点大小: 半径 3px（小点分散）
-```
-
 ---
 
 ### 阶段二：核心代码实现
 
-**Task: 创建 map_visualizer.py**
-
 **User Prompt:**
 > 生成 map 有关代码时注意不要写类似 st.map(map_data, color_colume="color") 的拼写错误。使用真实地图图片作为背景，数据点更小更分散。
 
-**Agent Implementation:**
-- 使用 Folium.Map() 基于 OpenStreetMap 瓦片
-- CircleMarker radius=3（小点），fill_opacity=0.7（半透明分散感）
-- 颜色映射函数 rsrp_to_hex_color() / rsrp_to_rgba()
-- 图例 HTML 叠加层
-- 支持多图层切换
-- 3D 地图使用 PyDeck ColumnLayer
+---
 
-**代码片段（map_visualizer.py）：**
-```python
-# CircleMarker with small radius for scattered look
-folium.CircleMarker(
-    location=[row["Latitude"], row["Longitude"]],
-    radius=3,               # Small points
-    color=color,
-    fill=True,
-    fill_color=color,
-    fill_opacity=0.7,       # Semi-transparent
-    popup=folium.Popup(popup_text, max_width=250),
-    tooltip=f"RSRP: {row['RSRP_dBm']:.1f} dBm",
-).add_to(m)
-```
+**User Prompt:**
+> Points colored by RSRP: 🟢 Good (> -90 dBm) | 🟡 Fair (-110 ~ -90 dBm) | 🔴 Weak (< -110 dBm). Hover for details, use layer control to switch map style.
+>
+> NameError: name 'st_folium' is not defined
 
 ---
 
-**Task: 创建 chart_generator.py**
-
-**Agent Implementation:**
-- plot_band_bar_chart(): Plotly 柱状图，频段计数
-- plot_terminal_pie_chart(): Plotly 饼图，终端类型比例
-- 空数据保护
-- 一致的颜色配色方案
+**User Prompt:**
+> 3D Signal Intensity Map (PyDeck)
+> 3D columns where height represents download speed (Mbps) and color represents RSRP signal strength. Drag to rotate, scroll to zoom.
+>
+> TypeError: PydeckMixin.pydeck_chart() got an unexpected keyword argument 'height'
 
 ---
 
-**Task: 更新 app.py**
+**User Prompt:**
+> 还是刚才的任务，任务要求里有：数据概览图表：在地图下方，让 AI 生成一个柱状图或饼图，统计当前数据中"各频段的基站数量"或"不同类型终端的占比"。但你把数据概览图标单开了，没有放在2d和3d图下面，请修改
 
-**Agent Implementation:**
-- Tab 布局：2D 地图 / 3D 地图 / 数据图表
-- st_folium() 渲染 Folium 地图
-- st.pydeck_chart() 渲染 3D 地图
-- 数据概览指标卡片
-- 可展开原始数据表格
+---
+
+**User Prompt:**
+> 还是刚才的任务，按照比赛要求帮我把所有内容推到github：code-with-ai-contest-token-wireless上：https://github.com/hrl-2026/code-with-ai-contest-token-wireless/blob/main/README.md
+
+---
+
+**User Prompt:**
+> 任务里要求"基础关卡完成：提交代码并执行 git tag basic-done，随后 git push origin basic-done。进阶关卡完成：提交代码并执行 git tag advanced-done，随后 git push origin advanced-done。 (评委将严格以对应 Tag 被推送到代码仓服务器的时间戳作为最终的完赛时间) " 问：这个做到了吗
+
+---
+
+**User Prompt:**
+> 3d图片加载不出来，要点一下放大才能加载和查看，这个修复一下
+
+---
+
+**User Prompt:**
+> 还是刚才的任务， 运行截图：提供 2-3 张 Web 应用运行时的截图，展示地图和侧边栏交互。这个任务没有按要求，要用png截图，不是html交互，2d和3d截图包含数据图，截取全面一点。
+
+---
+
+**User Prompt:**
+> 还是刚才的任务，你没有更新AI_PROMPTS.md和README.md，把现在AI_PROMPTS.md 里面的你的思考路径删掉、把所有我给你输入过的prompts记录其中，然后根据上个命令的修改更新README.md
 
 ---
 
 ### 阶段三：测试与验证
-
-**Task: 编写单元测试**
-
-**Agent Implementation:**
-- 39 个测试用例覆盖：
-  - 数据加载：列验证、缺失值处理、颜色列生成
-  - 颜色映射：RSRP→RGBA、RSRP→Hex 的边界条件
-  - 地图渲染：空数据处理、类型验证
-  - 图表生成：频段数量验证、空数据保护
-  - 筛选逻辑：单一/组合条件筛选验证
-  - 集成测试：真实数据端到端验证
 
 **Test Result:**
 ```
@@ -131,12 +96,20 @@ folium.CircleMarker(
 **现象：** `st.map(df, color_column="RSRP")` 会报 `unexpected keyword argument 'color_column'`
 **解决：** 切换至 Folium + CircleMarker，支持自定义颜色和弹窗
 
-### 问题 2：3D 地图数据点过于密集
-**现象：** PyDeck ColumnLayer 默认半径过大，柱子互相遮挡
-**解决：** 调整 radius=15，启用透明度
+### 问题 2：st.pydeck_chart() 不支持 height 参数
+**现象：** `st.pydeck_chart(deck, height=600)` 报 TypeError
+**解决：** 移除 height 参数，在 pdk.Deck() 中设置 height=600
 
-### 问题 3：网络环境依赖安装慢
-**现象：** pip install 从默认源超时
+### 问题 3：st_folium 未导入
+**现象：** `NameError: name 'st_folium' is not defined`
+**解决：** 添加 `from streamlit_folium import st_folium` 导入
+
+### 问题 4：3D PyDeck 地图初始不渲染
+**现象：** 3D 地图打开时显示为空白，需点击全屏放大后才加载
+**解决：** 在 pdk.Deck() 中添加 height=600，并用 st.container(height=650) 包裹
+
+### 问题 5：网络环境依赖安装慢 / 地图瓦片加载失败
+**现象：** pip install 超时；OpenStreetMap/CartoDB 瓦片在中国大陆无法加载
 **解决：** 切换至清华镜像源 `-i https://pypi.tuna.tsinghua.edu.cn/simple`
 
 ---
@@ -147,3 +120,4 @@ folium.CircleMarker(
 2. **颜色配置：** 在 data_loader 层预计算颜色（RGBA + Hex），保持各模块颜色一致
 3. **空数据保护：** 所有可视化组件需处理空 DataFrame 场景，避免白屏崩溃
 4. **分层架构：** data_loader → sidebar_filter → map_visualizer + chart_generator 的数据流清晰，便于维护
+5. **Headless 截图：** Playwright 在 headless 模式下 WebGL/PyDeck 无法渲染，地图瓦片受网络环境影响可能不显示

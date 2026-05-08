@@ -1,7 +1,7 @@
 # 📡 5G 信号可视化看板
 
 > **Code with AI 海选赛 — 5G 信号可视化看板挑战**
-> (3d图地图精细，初次加载慢，若未直接显示可点击右上角<>放大之后刷新即可正常加载)
+>
 > 交互式 Web 看板，将 5G 路测数据（RSRP/SINR/频段）转化为可视化地图与图表。
 
 ---
@@ -18,9 +18,9 @@
     - 🔴 **红色** — 信号弱（RSRP < -110 dBm）
   - 支持多图层切换（OpenStreetMap / CartoDB）
   - 图例标注、点击弹窗显示详细信息
-- **📊 数据概览图表** — Plotly 交互式图表：
-  - 频段基站数量柱状图
-  - 终端类型分布饼图
+- **📊 数据概览图表** — 地图下方展示 Plotly 交互式图表：
+  - 各频段基站数量柱状图
+  - 不同类型终端占比饼图
 
 ### 🟡 进阶关卡（已全部完成）
 
@@ -99,7 +99,7 @@ pytest test_dashboard.py -v
 
 ```
 .
-├── app.py                  # 主入口：Streamlit 看板
+├── app.py                  # 主入口：Streamlit 看板（2 tabs 布局）
 ├── data_loader.py          # 数据加载与预处理
 ├── sidebar_filter.py       # 侧边栏筛选组件
 ├── map_visualizer.py       # 地图渲染（2D Folium + 3D PyDeck）
@@ -107,6 +107,7 @@ pytest test_dashboard.py -v
 ├── test_dashboard.py       # 单元测试（39 个用例）
 ├── data/
 │   └── signal_samples.csv  # 5G 路测模拟数据集
+├── screenshots/            # 运行截图
 ├── requirements.txt        # Python 依赖
 ├── AI_PROMPTS.md           # AI 交互日志（核心验收项）
 └── README.md               # 本文件
@@ -116,14 +117,17 @@ pytest test_dashboard.py -v
 
 ## 📸 运行截图
 
-> （截图文件存放于 `screenshots/` 目录）
+> 截图文件存放于 `screenshots/` 目录
 
-| 2D 信号地图 | 3D 信号强度地图 | 数据图表 |
+| 2D 信号地图（含频段柱状图） | 3D 信号地图（含终端饼图） | 筛选交互后的 2D 地图 |
 |:---:|:---:|:---:|
-| [查看交互式 HTML](screenshots/map_2d.html) | [查看交互式 HTML](screenshots/map_3d.html) | ![Charts](screenshots/charts.png) |
+| ![2D Map](screenshots/01-2d-map-full.png) | ![3D Map](screenshots/02-3d-map-full.png) | ![Filtered](screenshots/03-filtered-map.png) |
 
-> **说明：** 地图为交互式 HTML 文件（Folium / PyDeck），需要用浏览器打开查看。  
-> 在终端运行 `streamlit run app.py` 可在浏览器中看到完整的实时看板。
+**布局说明：**
+- **Tab 1 — 🗺️ 2D Signal Map：** Folium 地图 → 指标统计（4 个 Metric）→ 频段基站数量柱状图 → 原始数据表
+- **Tab 2 — 🌐 3D Signal Map：** PyDeck 3D 地图 → 终端类型分布饼图
+
+> **注意：** 地图瓦片（OpenStreetMap）需要互联网访问。在无网络或受限环境下，地图背景可能显示为空白，但数据点（CircleMarker）和下方图表正常渲染。
 
 ---
 
