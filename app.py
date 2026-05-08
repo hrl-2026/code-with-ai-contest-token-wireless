@@ -14,6 +14,7 @@ Author: AI-assisted development via Hermes Agent
 
 import streamlit as st
 import pandas as pd
+from streamlit_folium import st_folium
 from data_loader import load_and_preprocess_data
 from sidebar_filter import create_sidebar_filters
 from map_visualizer import render_2d_map, render_3d_map
@@ -61,8 +62,8 @@ filtered_df = create_sidebar_filters(df)
 # ============================================================
 # Main Content - Tabbed Layout
 # ============================================================
-tab1, tab2, tab3 = st.tabs(
-    ["🗺️ 2D Signal Map", "🌐 3D Signal Map", "📊 Data Charts"]
+tab1, tab2 = st.tabs(
+    ["🗺️ 2D Signal Map", "🌐 3D Signal Map"]
 )
 
 # --- Tab 1: 2D Folium Map ---
@@ -112,36 +113,11 @@ with tab1:
             if not filtered_df.empty else "N/A",
         )
 
-# --- Tab 2: 3D PyDeck Map ---
-with tab2:
-    st.subheader("3D Signal Intensity Map (PyDeck)")
-    st.caption(
-        "3D columns where **height** represents download speed (Mbps) "
-        "and **color** represents RSRP signal strength. "
-        "Drag to rotate, scroll to zoom."
-    )
-
-    if filtered_df.empty:
-        st.warning("No data points match the current filter criteria.")
-    else:
-        deck = render_3d_map(filtered_df)
-        st.pydeck_chart(deck, height=600, use_container_width=True)
-
-# --- Tab 3: Charts ---
-with tab3:
-    st.subheader("Data Distribution Charts")
-
-    col_c1, col_c2 = st.columns(2)
-
-    with col_c1:
-        st.markdown("**Base Station Count by Frequency Band**")
-        band_chart = plot_band_bar_chart(filtered_df)
-        st.plotly_chart(band_chart, use_container_width=True)
-
-    with col_c2:
-        st.markdown("**Terminal Type Distribution**")
-        pie_chart = plot_terminal_pie_chart(filtered_df)
-        st.plotly_chart(pie_chart, use_container_width=True)
+    # --- Data overview chart below 2D map ---
+    st.divider()
+    st.markdown("#### 📊 各频段基站数量")
+    band_chart = plot_band_bar_chart(filtered_df)
+    st.plotly_chart(band_chart, use_container_width=True)
 
     # Raw data table (expandable)
     with st.expander("📋 View Raw Data"):
@@ -155,6 +131,27 @@ with tab3:
             use_container_width=True,
             height=300,
         )
+
+# --- Tab 2: 3D PyDeck Map ---
+with tab2:
+    st.subheader("3D Signal Intensity Map (PyDeck)")
+    st.caption(
+        "3D columns where **height** represents download speed (Mbps) "
+        "and **color** represents RSRP signal strength. "
+        "Drag to rotate, scroll to zoom."
+    )
+
+    if filtered_df.empty:
+        st.warning("No data points match the current filter criteria.")
+    else:
+        deck = render_3d_map(filtered_df)
+        st.pydeck_chart(deck, use_container_width=True)
+
+    # --- Data overview chart below 3D map ---
+    st.divider()
+    st.markdown("#### 📊 不同类型终端占比")
+    pie_chart = plot_terminal_pie_chart(filtered_df)
+    st.plotly_chart(pie_chart, use_container_width=True)
 
 # ============================================================
 # Footer
