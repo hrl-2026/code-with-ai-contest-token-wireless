@@ -231,4 +231,5 @@ def render_3d_map(df: pd.DataFrame) -> pdk.Deck:
         tooltip=tooltip,
         map_provider="carto",
         map_style="light",
+        height=600,
     )

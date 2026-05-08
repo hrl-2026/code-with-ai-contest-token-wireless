@@ -145,7 +145,8 @@ with tab2:
         st.warning("No data points match the current filter criteria.")
     else:
         deck = render_3d_map(filtered_df)
-        st.pydeck_chart(deck, use_container_width=True)
+        with st.container(height=650):
+            st.pydeck_chart(deck, use_container_width=True)
 
     # --- Data overview chart below 3D map ---
     st.divider()
